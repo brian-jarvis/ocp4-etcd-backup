@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: etcd-infra
+  annotations:
+    openshift.io/node-selector: "master" 
+  labels:
+    app: etcd-infra
