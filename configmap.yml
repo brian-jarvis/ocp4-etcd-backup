@@ -21,6 +21,9 @@ data:
     chroot /host /tmp/backup-scripts/create-backup
     if [ $? -eq 0 ]; then
       echo Backup was success
+      # clean up previous backups to keep the last 5
+      ls -d -1tr  ${BACKUP_PATH}/* | head -n -4 | xargs -d '\n' rm -f
+      
       cp -r /host/tmp/${DATESTRING}/assets/backup/*  $BACKUP_PATH
       echo "Backup copied to $BACKUP_PATH"
     else
