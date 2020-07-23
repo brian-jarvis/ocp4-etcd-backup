@@ -4,3 +4,5 @@ metadata:
   name: etcd-infra
   labels:
     app: etcd-infra
+  annotations:
+    openshift.io/node-selector: ''
