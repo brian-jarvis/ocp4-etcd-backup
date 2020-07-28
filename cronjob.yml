@@ -32,7 +32,6 @@ spec:
                   value: /tmp/etcd_backup/assets
                 - name: BACKUP_SCRIPT
                   value: /usr/local/bin/cluster-backup.sh
-              #image: registry.redhat.io/openshift4/ose-cli:v4.4
               image: registry.redhat.io/rhel7/support-tools
               command:
                 - /usr/bin/bash
