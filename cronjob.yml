@@ -10,11 +10,11 @@ spec:
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 2
-  parallelism: 1
-  backoffLimit: 0
   jobTemplate:
     spec:
       template:
+        parallelism: 1
+        backoffLimit: 0
         metadata:
           generateName: etcd-backup-
           namespace: etcd-infra
@@ -63,9 +63,11 @@ spec:
               hostPath:
                 path: /
                 type: Directory
+            # - name: etcd-backup-data
+            #   persistentVolumeClaim:
+            #     claimName: etcd-backup
             - name: etcd-backup-data
-              persistentVolumeClaim:
-                claimName: etcd-backup
+              emptydir: {}
           tolerations:
             - key: node-role.kubernetes.io/master
               operator: Exists
