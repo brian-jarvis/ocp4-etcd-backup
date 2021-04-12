@@ -16,7 +16,7 @@ data:
     chroot /host /usr/local/bin/cluster-backup.sh /home/core/assets/backup 
     ls -d -1tr ${BACKUP_PATH}/*  | head -n -4 | xargs -d '\n' rm -rf
     mkdir -p ${BACKUP_PATH}/${DATESTRING}
-    cd ${DATESTRING}
+    cd ${BACKUP_PATH}/${DATESTRING}
     cp -r /host/home/core/assets/backup/ .
     rm -rf /host/home/core/assets/backup
     exit $?
