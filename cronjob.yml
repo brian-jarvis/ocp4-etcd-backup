@@ -1,5 +1,8 @@
 apiVersion: batch/v1beta1
 kind: CronJob
+metadata:
+  name: etcd-backup
+  namespace: etcd-infra
   labels:
     app: etcd-infra
 spec:
@@ -83,7 +86,6 @@ spec:
           - name: etcd-backup-data
             persistentVolumeClaim:
               claimName: etcd-backup
-  schedule: '0 0 * * *'
+  schedule: '*/5 * * * *'
   successfulJobsHistoryLimit: 3
   suspend: false
-
