@@ -11,6 +11,6 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: pvc-46ac483d-71c4-44bb-a4f2-bf06aa5e3025
+  volumeName: etcd-backup-data
   storageClassName: gp2
   volumeMode: Filesystem

@@ -1,0 +1,20 @@
+apiVersion: "v1"
+kind: Pod
+metadata:
+  name: pv-extract
+spec:
+  containers:
+    - name: pv-extract-pod
+      image: registry.access.redhat.com/ubi8/ubi
+      command: ["sleep", "3000"]
+      volumeMounts:
+        - mountPath: "/tmp/etcd_backup/assets"
+          name: etcd-backup-data
+  volumes:
+    - name: etcd-backup-data
+      persistentVolumeClaim:
+        claimName: etcd-backup
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+      operator: Exists

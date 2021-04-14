@@ -6,69 +6,86 @@ metadata:
   labels:
     app: etcd-infra
 spec:
-  schedule: '*/10 * * * *'
   concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 2
   jobTemplate:
+    metadata:
+      creationTimestamp: null
     spec:
       template:
-        parallelism: 1
-        backoffLimit: 0
         metadata:
-          generateName: etcd-backup-
-          namespace: etcd-infra
-          labels:
-            app: etcd-infra
           annotations:
             openshift.io/scc: node-exporter
+          creationTimestamp: null
+          generateName: etcd-backup-
+          labels:
+            app: etcd-infra
+          namespace: etcd-infra
         spec:
           containers:
-            - name: etcd-backup
-              stdin: true
-              tty: true
-              env:
-                - name: BACKUP_PATH
-                  value: /tmp/etcd_backup/assets
-                - name: BACKUP_SCRIPT
-                  value: /usr/local/bin/cluster-backup.sh
-              image: registry.redhat.io/rhel7/support-tools
-              command:
-                - /usr/bin/bash
-                - '-c'
-                - '/tmp/backup-scripts/manage-backup'
-              securityContext:
-                privileged: true
-                runAsUser: 0
-              volumeMounts:
-                - name: etcd-backup-scripts
-                  mountPath: /tmp/backup-scripts/
-                  readOnly: true
-                  #subPath: run-backup
-                - name: host
-                  mountPath: /host
-                - name: etcd-backup-data
-                  mountPath: /tmp/etcd_backup/assets
-              imagePullPolicy: IfNotPresent
+          - command:
+            - /usr/bin/bash
+            - -c
+            - /tmp/backup-scripts/manage-backup
+            env:
+            - name: BACKUP_PATH
+              value: /tmp/etcd_backup/assets
+            - name: BACKUP_SCRIPT
+              value: /usr/local/bin/cluster-backup.sh
+            image: quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:5a1ff3e2240f10a6c7ca5e2364149286c19df32575a479e6f2b10009ad64fedd
+            imagePullPolicy: IfNotPresent
+            name: etcd-backup
+            resources: {}
+            securityContext:
+              privileged: true
+              runAsUser: 0
+            stdin: true
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            tty: true
+            volumeMounts:
+            - mountPath: /tmp/backup-scripts/
+              name: etcd-backup-scripts
+              readOnly: true
+            - mountPath: /host
+              name: host
+            - mountPath: /tmp/etcd_backup/assets
+              name: etcd-backup-data
+          dnsPolicy: ClusterFirst
+          hostNetwork: true
+          hostPID: true
           nodeSelector:
-            node-role.kubernetes.io/master: ''
+            node-role.kubernetes.io/master: ""
           restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext: {}
+          serviceAccount: etcd-backup
           serviceAccountName: etcd-backup
-          volumes:
-            - name: etcd-backup-scripts
-              configMap:
-                defaultMode: 0777
-                name: etcd-backup-scripts
-            - name: host
-              hostPath:
-                path: /
-                type: Directory
-            # - name: etcd-backup-data
-            #   persistentVolumeClaim:
-            #     claimName: etcd-backup
-            - name: etcd-backup-data
-              emptydir: {}
+          terminationGracePeriodSeconds: 30
           tolerations:
-            - key: node-role.kubernetes.io/master
-              operator: Exists
-              effect: NoSchedule
+          - effect: NoSchedule
+            key: node-role.kubernetes.io/master
+            operator: Exists
+          - effect: NoExecute
+            key: node.kubernetes.io/not-ready
+            operator: Exists
+            tolerationSeconds: 300
+          - effect: NoExecute
+            key: node.kubernetes.io/unreachable
+            operator: Exists
+            tolerationSeconds: 300
+          volumes:
+          - configMap:
+              defaultMode: 511
+              name: etcd-backup-scripts
+            name: etcd-backup-scripts
+          - hostPath:
+              path: /
+              type: Directory
+            name: host
+          - name: etcd-backup-data
+            persistentVolumeClaim:
+              claimName: etcd-backup
+  schedule: '*/5 * * * *'
+  successfulJobsHistoryLimit: 3
+  suspend: false
