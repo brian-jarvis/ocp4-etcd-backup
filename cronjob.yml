@@ -6,7 +6,7 @@ metadata:
   labels:
     app: etcd-infra
 spec:
-  schedule: '*/10 * * * *'
+  schedule: '*/1 * * * *'
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 2
@@ -54,6 +54,7 @@ spec:
             node-role.kubernetes.io/master: ''
           restartPolicy: Never
           serviceAccountName: etcd-backup
+          hostNetwork: true
           volumes:
             - name: etcd-backup-scripts
               configMap:
@@ -63,11 +64,11 @@ spec:
               hostPath:
                 path: /
                 type: Directory
-            # - name: etcd-backup-data
-            #   persistentVolumeClaim:
-            #     claimName: etcd-backup
             - name: etcd-backup-data
-              emptydir: {}
+              persistentVolumeClaim:
+                claimName: etcd-backup
+            # - name: etcd-backup-data
+            #   emptydir: {}
           tolerations:
             - key: node-role.kubernetes.io/master
               operator: Exists
